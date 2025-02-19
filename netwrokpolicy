@@ -1,0 +1,22 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: solar-sky
+  namespace: iphone                         
+spec:
+  podSelector:
+    matchLabels:
+      role: sky
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          role: solar
+  egress:
+  - to:
+    - podSelector:
+        matchLabels:
+          role: solar
