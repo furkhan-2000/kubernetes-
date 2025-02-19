@@ -1,0 +1,28 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: dyson
+  namespace: tough
+spec:
+  podSelector:
+    matchLabels:
+      role: bottle
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          role: gungun
+    - podSelector:
+        matchLabels:
+          role: terraform
+  egress:
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          role: gungun
+    - podSelector:
+        matchLabels:
+          role: terraform
