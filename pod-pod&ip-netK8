@@ -1,28 +1,24 @@
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: bag
-  namespace: laptop
+  name: sovet
+  namespace: tomorrow
 spec:
   podSelector:
     matchLabels:
-      role: chatop
+      role: bag
   policyTypes:
   - Ingress
   - Egress
   ingress:
   - from:
-    - namespaceSelector:
-        matchLabels:
-          role: paptop
     - podSelector:
         matchLabels:
-          role: naptop
+          role: bug
   egress:
   - to:
-    - namespaceSelector:
-        matchLabels:
-          role: paptop
     - podSelector:
         matchLabels:
-          role: naptop
+          role: bug
+    - ipBlock:
+        cidr: 172.31.32.0/20
