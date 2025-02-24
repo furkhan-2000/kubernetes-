@@ -1,0 +1,25 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: mustang
+  namespace: default
+rules:
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["get","list"]
+- apiGroups: ["apps"]
+  resources: ["replicaset", "deployment"]
+  verbs: ["create", "get", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: saviour
+  namespace: default
+subjects:
+- kind: Group
+  name: warior
+roleRef:
+  kind: Role
+  name: mustang
+  apiGroup: rbac.authorization.k8s.io
