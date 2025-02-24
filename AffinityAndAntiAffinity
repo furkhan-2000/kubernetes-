@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: dep
+  namespace: phone
+spec:
+  affinity:                                                                #  attarcts each other with same labels 
+    podAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchLabels:
+            app: charge
+        topologyKey: "kubernetes.io/hostname"
+---
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: test
+  namespace: uber
+spec:
+  affinity:                                                          # replles, go aways with each other with same labels 
+    podAntiAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchLabels:
+            app: charge
