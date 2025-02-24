@@ -1,0 +1,51 @@
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: lappy                                                                                # high priority class
+value: 10000
+globalDefault: false
+description: "this is for demo && for high priority"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lappo
+  namespace: default
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      tier: play
+  template:                                                                                  # high priority class deployment appended 
+    metadata:
+      labels:
+        tier: play
+    spec:
+      terminationGracePeriodSeconds: 30
+      priorityClassName: lappy  
+      containers:
+        - name: xyz
+          image: furkhan2000/shark:httpdneo
+          ports:
+            - containerPort: 80
+---
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: lap
+value: 1000                                                                                      # low priority class
+globalDefault: false
+description: "this is low priority class"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod1
+  namespace: default                                                                               # low priority class appended to pod
+spec:
+  priorityClassName: lap
+  containers:
+    - name: kk
+      image: httpd
+
+
