@@ -1,0 +1,245 @@
+# --- Block 1 ---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ing-1-cm
+  namespace: apple
+data:
+  message: "below is oracle DB 512 encrypted private key"
+  databaseKey: "1234567890ABCDEF1234567890ABCDEF"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-1-in
+  namespace: apple
+spec:
+  storageClassName: standard
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1000Mi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dep-1-in
+  namespace: apple
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      tier: holy
+  template:
+    metadata:
+      labels:
+        tier: holy
+    spec:
+      terminationGracePeriodSeconds: 20
+      containers:
+        - name: httpd
+          image: furkhan2000/shark:httpdneo
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - name: configs
+              mountPath: /configmap
+            - name: custompvc
+              mountPath: /my-pvc
+          livenessProbe:
+            tcpSocket:
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 10
+      volumes:
+        - name: configs
+          configMap:
+            name: ing-1-cm
+        - name: custompvc
+          persistentVolumeClaim:
+            claimName: pvc-1-in
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ing-1-svc
+  namespace: apple
+spec:
+  selector:
+    tier: holy
+  ports:
+    - port: 80
+      protocol: TCP
+      targetPort: 80
+
+# --- Block 2 ---
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ing-2-cm
+  namespace: apple
+data:
+  message: "below is encrypted private key for mongoDB"
+  databaseKey: "798986567890ABCDEF15454554590ABCDEF"
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: ing-2-pv
+  namespace: apple
+spec:
+  storageClassName: standard
+  persistentVolumeReclaimPolicy: Delete
+  capacity:
+    storage: 1000Mi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /tmp/pv2data
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-2-in
+  namespace: apple
+spec:
+  storageClassName: standard
+  volumeName: ing-2-pv
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 980Mi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dep-2-in
+  namespace: apple
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      tier: unholy
+  template:
+    metadata:
+      labels:
+        tier: unholy
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+        - name: tomcat
+          image: furkhan2000/shark:tomcatneo
+          ports:
+            - containerPort: 8080
+          volumeMounts:
+            - name: cm
+              mountPath: /config
+            - name: pvc2
+              mountPath: /custompvc
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 7
+      volumes:
+        - name: cm
+          configMap:
+            name: ing-2-cm
+        - name: pvc2
+          persistentVolumeClaim:
+            claimName: pvc-2-in
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ing-2-svc
+  namespace: apple
+spec:
+  selector:
+    tier: unholy
+  ports:
+    - port: 8080
+      protocol: TCP
+      targetPort: 8080
+
+# --- Block 3 ---
+---
+apiVersion: v1 
+kind: PersistentVolume 
+metadata: 
+  name: ing-3-pv 
+  namespace: apple 
+spec: 
+  storageClassName: standard 
+  persistentVolumeReclaimPolicy: Retain
+  capacity:
+    storage: 1000Mi 
+  accessModes: 
+    - ReadWriteOnce 
+  hostPath: 
+    path: /tmp/pv3data
+---
+apiVersion: v1 
+kind: PersistentVolumeClaim 
+metadata: 
+  name: pvc-3-in 
+  namespace: apple 
+spec: 
+  storageClassName: standard 
+  volumeName: ing-3-pv  
+  accessModes: 
+    - ReadWriteOnce 
+  resources: 
+    requests: 
+      storage: 1000Mi 
+---
+apiVersion: apps/v1 
+kind: Deployment 
+metadata: 
+  name: dep-3-in 
+  namespace: apple 
+spec: 
+  replicas: 3
+  selector: 
+    matchLabels: 
+      tier: warrior 
+  template: 
+    metadata: 
+      labels: 
+        tier: warrior 
+    spec:  
+      terminationGracePeriodSeconds: 20
+      containers: 
+        - name: officialngx 
+          image: nginx:latest  
+          ports: 
+            - containerPort: 80 
+          volumeMounts: 
+            - name: pvc3 
+              mountPath: /custpvc3 
+          livenessProbe: 
+            tcpSocket: 
+              port: 80 
+            initialDelaySeconds: 5 
+            periodSeconds: 10 
+      volumes:
+        - name: pvc3 
+          persistentVolumeClaim: 
+            claimName: pvc-3-in
+---
+apiVersion: v1 
+kind: Service 
+metadata: 
+  name: ing-3-svc
+  namespace: apple 
+spec: 
+  selector: 
+    tier: warrior
+  ports: 
+    - port: 80
+      protocol: TCP 
+      targetPort: 80

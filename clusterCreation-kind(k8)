@@ -1,0 +1,66 @@
+THIS IS MOSTLY USED FOR TESTING AND DEVELPOMENT PURPOSE-NOT FOR PRODUCTION: 
+
+Kubernetes cluster using kind::(3-node) you can take any no of nodes based on your hardware capabilites 
+
+if working on cloud min availiability, so that it should work effecient {{{H/W: min t2.large, on t2.micro it will not work
+And moreover storage 12-15gb gp3
+}}} 
+
+if working on vm's  
+  basic requirements: 
+  CPU: 4 vCPU
+  Memory: 12 GB (again based on ur nodes and complexsity of your application) 
+----------------------------------------------------------------------------------------------------------------------------------
+
+update os:           yum update -y     
+Install docker:      yum install podman-docker -y
+start & enable:      systemctl enable podman-docker --now 
+Install kind (k8 in docker) 
+  Download kind Binary:  
+                    
+                  curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.14.0/kind-linux-amd64 
+
+Make it Executable for executing it::
+ 
+                  chmod +x ./kind 
+
+Move to path for making it accessible from globally on cluster:: 
+
+                  sudo mv ./kind /usr/local/bin/kind 
+----------------------------------------------------------------------------------------------------------------------------------
+
+create configuration file (kind-config.yaml) :: 
+  
+                  apiVersion: kind.x-k8s.io/v1alpha4
+                  kind: Cluster
+                  nodes:
+                    - role: control-plane
+                    - role: worker
+                    - role: worker
+                  
+Make it Executable for executing it::(optional) 
+   
+                   chmod +x kind-config.yaml
+                
+create cluster: 
+ 
+                   kind create cluster --config=kind-config.yaml --retain -v=4 
+
+ install kubectl (kubernetes CLI):: 
+  
+                    curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" 
+
+Make it executable: 
+                    chmod a+x kubectl 
+
+move to path for making it globally accessible: 
+                
+                     sudo mv kubectl /usr/local/bin/
+
+verify : installation 
+                 
+                      kubectl version --client
+--------------------------------------------------------------------------------------------------------------------------------
+
+
+     
