@@ -1,0 +1,139 @@
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: pc2
+value: 100000
+description: "hello motto"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: con
+  namespace: apple
+data:
+  userid: "jdkjdksdjlflsfndlfnlfnnf" # encrypted one
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv
+spec:
+  storageClassName: standard
+  capacity:
+    storage: 1000Mi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /mnt/data
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc1
+  namespace: apple
+spec:
+  storageClassName: standard
+  volumeName: pv
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 900Mi
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: role
+  namespace: samsung
+rules:
+  - apiGroups: ["", "apps"]
+    resources: ["pods", "replicasets", "deployments", "configmaps"]
+    verbs: ["get", "list", "create", "delete"]
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: testing
+  namespace: samsung
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: bindings
+  namespace: samsung
+subjects:
+  - kind: ServiceAccount
+    name: testing
+    namespace: samsung
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: role
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dep
+  namespace: apple
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      tier: lap
+  template:
+    metadata:
+      labels:
+        tier: lap
+    spec:
+      terminationGracePeriodSeconds: 20
+      priorityClassName: pc2
+      containers:
+        - name: con1
+          image: nginx
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - name: store
+              mountPath: /demo1
+            - name: cmstore
+              mountPath: /cmroom
+          livenessProbe:
+            tcpSocket:
+              port: 80
+            initialDelaySeconds: 8
+            periodSeconds: 10
+      volumes:
+        - name: store
+          persistentVolumeClaim:
+            claimName: pvc1
+        - name: cmstore
+          configMap:
+            name: con
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc1
+  namespace: apple
+spec:
+  selector:
+    tier: lap
+  ports:
+    - port: 80
+      protocol: TCP
+      targetPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc2
+  namespace: apple
+spec:
+  type: NodePort
+  selector:
+    tier: lap
+  ports:
+    - port: 80
+      protocol: TCP
+      targetPort: 80
+      nodePort: 31050
