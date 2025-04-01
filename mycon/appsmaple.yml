@@ -40,36 +40,6 @@ spec:
     requests:
       storage: 900Mi
 ---
-apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
-metadata:
-  name: role
-  namespace: samsung
-rules:
-  - apiGroups: ["", "apps"]
-    resources: ["pods", "replicasets", "deployments", "configmaps"]
-    verbs: ["get", "list", "create", "delete"]
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: testing
-  namespace: samsung
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
-metadata:
-  name: bindings
-  namespace: samsung
-subjects:
-  - kind: ServiceAccount
-    name: testing
-    namespace: samsung
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: Role
-  name: role
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
